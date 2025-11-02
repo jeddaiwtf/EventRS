@@ -1,0 +1,28 @@
+<!-- templates/tickets/validate_ticket.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Ticket Validation</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="container">
+    {% if valid %}
+      <h1 style="color:green;">✅ Ticket Valid</h1>
+      <p><strong>Ticket:</strong> {{ ticket.id }}</p>
+      {% if ticket.event %}
+        <p><strong>Event:</strong> {{ ticket.event.title }}</p>
+      {% endif %}
+      <p><strong>Used at:</strong> {{ ticket.used_at }}</p>
+    {% else %}
+      <h1 style="color:red;">❌ Ticket Invalid</h1>
+      <p>Reason: {{ reason|default:"unknown" }}</p>
+      {% if ticket %}
+        <p>Ticket ID: {{ ticket.id }}</p>
+      {% endif %}
+    {% endif %}
+    <p><a href="{% url 'ticket-register-page' %}">Back to register</a></p>
+  </div>
+</body>
+</html>
