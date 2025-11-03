@@ -5,6 +5,7 @@ from urllib.parse import quote_plus
 import requests
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.urls import reverse
 
 QR_API_BASE = "https://api.qrserver.com/v1/create-qr-code/"
 
@@ -31,3 +32,14 @@ def generate_qr_and_save(ticket, payload_str: str, size: str = "300x300") -> str
     content = ContentFile(resp.content)
     ticket.qr_image.save(filename, content, save=False)
     return ticket.qr_image.url
+
+def build_landing_url(request, path: str):
+    """
+    Returns a full landing URL for QR codes.
+    Uses settings.BASE_URL if available (like an ngrok domain),
+    otherwise falls back to request.build_absolute_uri().
+    """
+    base = getattr(settings, "BASE_URL", "") or ""
+    if base:
+        return base.rstrip('/') + path
+    return request.build_absolute_uri(path)

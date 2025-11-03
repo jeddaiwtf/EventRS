@@ -1,108 +1,129 @@
-"""
-Django settings for event_qrproject project.
-"""
+# settings.py
 
-from pathlib import Path
 import os
+from pathlib import Path
 
-BASE_URL = os.getenv("BASE_URL", "")
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ------------------------------------------------------------------
+# Base directory of your Django project
+# ------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-defaultkeyfor-dev-only-1234567890')
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b8&er2fkb2drg%8xth+b3njwwr15jjs6%v21(1!+xr!%k=+sev'
-
+# ------------------------------------------------------------------
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# ------------------------------------------------------------------
+DEBUG = True  # ✅ Turn this ON during development. Set to False when deploying.
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+# ------------------------------------------------------------------
+# Allowed hosts — include localhost + ngrok during dev
+# ------------------------------------------------------------------
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "refractorily-catabatic-shirleen.ngrok-free.dev",  # your ngrok domain
+]
 
-
-# Application definition
+# ------------------------------------------------------------------
+# Installed apps (make sure 'tickets' is here)
+# ------------------------------------------------------------------
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    # Third-party
-    'rest_framework',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
 
     # Local apps
-    'tickets',
+    "tickets",
+    # Add other apps if you have them
 ]
 
+# ------------------------------------------------------------------
+# Middleware
+# ------------------------------------------------------------------
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'event_qrproject.urls'
+# ------------------------------------------------------------------
+# Root URL configuration
+# ------------------------------------------------------------------
+ROOT_URLCONF = "event_qrproject.urls"
 
+# ------------------------------------------------------------------
+# Templates
+# ------------------------------------------------------------------
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-
-        # 👇 Add a global template directory (optional but recommended)
-        'DIRS': [BASE_DIR / 'templates'],
-
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'event_qrproject.wsgi.application'
+# ------------------------------------------------------------------
+# WSGI
+# ------------------------------------------------------------------
+WSGI_APPLICATION = "event_qrproject.wsgi.application"
 
-
-# Database
+# ------------------------------------------------------------------
+# Database (default: SQLite)
+# ------------------------------------------------------------------
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
-
+# ------------------------------------------------------------------
 # Password validation
+# ------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
+# ------------------------------------------------------------------
 # Internationalization
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Manila'  # ✅ Localize for you
+# ------------------------------------------------------------------
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "Asia/Manila"
 USE_I18N = True
 USE_TZ = True
 
+# ------------------------------------------------------------------
+# Static and Media Files
+# ------------------------------------------------------------------
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]  # ✅ make sure /static folder exists
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
-# ✅ Static files (CSS, JS, images)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# ------------------------------------------------------------------
+# Base Public URL for generating external links / QR (used with ngrok)
+# ------------------------------------------------------------------
+BASE_URL = "https://refractorily-catabatic-shirleen.ngrok-free.dev"
+ # Example: https://abcd1234.ngrok-free.app
 
-# ✅ Media files (uploads like QR codes)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
+# ------------------------------------------------------------------
 # Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-TICKET_HMAC_KEY = '794afe5437a09b82e6fbdd17b4ec41492ad5bae346ac40c96c38ad285ebe44d8'  
+# ------------------------------------------------------------------
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

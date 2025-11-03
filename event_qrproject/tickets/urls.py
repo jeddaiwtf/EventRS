@@ -1,11 +1,16 @@
-# tickets/urls.py
 from django.urls import path
-from .views import RegisterTicketAPI, TicketDetailAPI, register_page, landing_validate_page
-from .validation_views import validate_ticket_api
 from . import views
 
 urlpatterns = [
-    path('register/', views.register_page, name='ticket-register-page'),
-    path('landing/<uuid:ticket_id>/<str:signature>/', views.landing_validate_page, name='ticket-landing'),
-    path('manage-events/', views.manage_events, name='manage-events'),
+    # ===== API Endpoints =====
+    path("api/register/", views.RegisterTicketAPI.as_view(), name="api_register_ticket"),
+    path("api/detail/<uuid:pk>/", views.TicketDetailAPI.as_view(), name="api_ticket_detail"),
+
+    # ===== HTML Pages =====
+    path("register/", views.register_ticket, name="ticket-register-page"),
+    path("landing/", views.landing_validate_page, name="landing_validate_page"),
+    path("manage-events/", views.manage_events, name="manage_events"),
+
+    # Validation URL using token from QR code
+    path("validate/<str:token>/", views.validate_ticket, name="validate_ticket"),
 ]

@@ -1,43 +1,67 @@
 import uuid
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.utils import timezone
 
-User = get_user_model()
 
 class Event(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True, null=True)
     start_at = models.DateTimeField()
-    end_at = models.DateTimeField(null=True, blank=True)
+    end_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ("-start_at",)
 
     def __str__(self):
         return self.title
 
+    @property
+    def is_active(self):
+        now = timezone.now()
+        return self.start_at <= now <= self.end_at
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.end_at
+
 
 class Ticket(models.Model):
-    STATUS_UNUSED = "unused"
-    STATUS_USED = "used"
     STATUS_CHOICES = [
-        (STATUS_UNUSED, "Unused"),
-        (STATUS_USED, "Used"),
+        ("active", "Active"),
+        ("used", "Used"),
+        ("expired", "Expired"),
+        ("invalid", "Invalid"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets", null=True, blank=True)
-    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="tickets")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_UNUSED)
-    used_at = models.DateTimeField(null=True, blank=True)
-    qr_code_url = models.URLField(blank=True, null=True)
-    signature = models.CharField(max_length=128, null=True, blank=True)
-
-    class Meta:
-        ordering = ("-created_at",)
+    used_at = models.DateTimeField(blank=True, null=True)
+    qr_image = models.ImageField(upload_to="tickets/qr_codes/", blank=True, null=True)
+    signature = models.CharField(max_length=255, blank=True, null=True)
+    token = models.CharField(max_length=100, unique=True, default=uuid.uuid4, editable=False)
 
     def __str__(self):
-        return f"Ticket {self.id} ({self.status})"
+        return f"Ticket for {self.event.title}"
+
+    # ✅ Core validation logic
+    def mark_as_used(self):
+        """
+        Mark the ticket as used, or return status message if expired/used.
+        Returns tuple: (success: bool, message: str)
+        """
+        now = timezone.now()
+
+        if self.event.end_at < now:
+            self.status = "expired"
+            self.save()
+            return False, "This ticket is expired. The event has ended."
+
+        if self.status == "used":
+            return False, f"This ticket was already validated at {self.used_at.strftime('%Y-%m-%d %H:%M:%S')}."
+
+        self.status = "used"
+        self.used_at = now
+        self.save()
+        return True, "Ticket successfully validated!"
